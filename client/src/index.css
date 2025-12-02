@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+@theme {
+  /* Core Colors - Will be mapped to CSS variables */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  
+  --color-bg-main: var(--bg-main);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-input: var(--bg-input);
+  
+  --color-border-light: var(--border-light);
+  --color-border-strong: var(--border-strong);
+  
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-text-accent: var(--text-accent);
+
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  --shadow-glow: 0 0 10px var(--primary), 0 0 20px var(--primary-dim);
+  --shadow-hud: 0 0 0 1px var(--border-strong), 0 0 20px -5px var(--primary-dim);
+
+  --animate-scanline: scanline 8s linear infinite;
+  --animate-blink: blink 1s step-end infinite;
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+}
+
+/* Theme Variables */
+:root {
+  /* Default to Dark Mode (Tactical Night) */
+  --primary: #00ff41; /* Neon Green */
+  --primary-dim: rgba(0, 255, 65, 0.2);
+  --primary-hover: #00cc33;
+  --secondary: #0ea5e9; /* Cyan/Blue for secondary data */
+  --accent: #f59e0b; /* Amber for alerts */
+
+  --bg-main: #020617; /* Deep Slate/Black */
+  --bg-surface: #0f172a; /* Slate 900 */
+  --bg-input: #1e293b; /* Slate 800 */
+
+  --border-light: #1e293b;
+  --border-strong: #334155;
+
+  --text-main: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-accent: #00ff41;
+}
+
+/* Light Mode (Tactical Day/Report) */
+.light-mode {
+  --primary: #0f172a; /* Navy Blue */
+  --primary-dim: rgba(15, 23, 42, 0.1);
+  --primary-hover: #1e293b;
+  --secondary: #2563eb; /* Bright Blue */
+  --accent: #dc2626; /* Red for alerts */
+
+  --bg-main: #f1f5f9; /* Slate 100 */
+  --bg-surface: #ffffff;
+  --bg-input: #e2e8f0;
+
+  --border-light: #cbd5e1;
+  --border-strong: #94a3b8;
+
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-accent: #2563eb;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* HUD Utilities */
+.hud-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-hud);
+  position: relative;
+}
+
+.hud-corner::before,
+.hud-corner::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: var(--primary);
+  border-style: solid;
+  transition: all 0.3s ease;
+}
+
+.hud-corner::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.hud-corner::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 65, 0.02) 51%, transparent 51%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.scanline::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(0deg, transparent, rgba(0, 255, 65, 0.05), transparent);
+  animation: scanline 8s linear infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
