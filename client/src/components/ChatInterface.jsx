@@ -6,6 +6,7 @@ import { database } from '../firebase';
 import { playTacticalSound } from '../utils/sound';
 import { initializeAI, analyzeThreatLevel } from '../services/ai';
 import { decryptMessage, encryptMessage } from '../utils/crypto';
+import DecryptedText from './DecryptedText';
 
 const ChatInterface = ({ role, onLogout, apiKey }) => {
   const [messages, setMessages] = useState([]);
