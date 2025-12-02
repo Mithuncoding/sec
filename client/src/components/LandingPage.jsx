@@ -19,9 +19,9 @@ const LandingPage = ({ onEnter }) => {
   const teamMembers = ["Mahesh", "Radhika", "Suresh", "Vaishnavi"];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-[#00ff41] font-mono flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-[#0a0a0a] text-[#00ff41] font-mono flex flex-col relative overflow-x-hidden overflow-y-auto">
       {/* Background Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,65,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.03)_1px,transparent_1px)] bg-[length:50px_50px] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,65,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
       
       {/* Hero Section */}
       <div className="flex-1 flex flex-col items-center justify-center relative z-10 p-6">

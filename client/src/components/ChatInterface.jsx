@@ -230,7 +230,7 @@ const ChatInterface = ({ role, onLogout, apiKey }) => {
             : 'bg-bg-input border-border-strong text-success'
           }`} title={threatAnalysis}>
             <AlertTriangle size={14} />
-            <div className="flex flex-col leading-none hidden sm:flex">
+            <div className="hidden sm:flex flex-col leading-none">
               <span className="text-[10px] font-bold">THREAT_LEVEL</span>
               <span className="text-xs font-bold">{threatLevel}%</span>
             </div>

@@ -33,7 +33,7 @@ const LoginScreen = ({ onLogin }) => {
     return (
         <div className="h-screen w-full bg-bg-main flex items-center justify-center p-4 relative overflow-hidden font-mono">
             {/* Grid Background */}
-            <div className="absolute inset-0 bg-[linear-gradient(var(--border-strong)_1px,transparent_1px),linear-gradient(90deg,var(--border-strong)_1px,transparent_1px)] bg-[length:40px_40px] opacity-20 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[linear-gradient(var(--border-strong)_1px,transparent_1px),linear-gradient(90deg,var(--border-strong)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none"></div>
             
             {/* Animated Scanline */}
             <div className="scanline"></div>
