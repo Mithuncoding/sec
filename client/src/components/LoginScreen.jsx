@@ -33,7 +33,7 @@ const LoginScreen = ({ onLogin }) => {
     return (
         <div className="h-screen w-full bg-bg-main flex items-center justify-center p-4 relative overflow-hidden font-mono">
             {/* Grid Background */}
-            <div className="absolute inset-0 bg-[linear-gradient(var(--border-strong)_1px,transparent_1px),linear-gradient(90deg,var(--border-strong)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[linear-gradient(var(--border-strong)_1px,transparent_1px),linear-gradient(90deg,var(--border-strong)_1px,transparent_1px)] bg-[length:40px_40px] opacity-20 pointer-events-none"></div>
             
             {/* Animated Scanline */}
             <div className="scanline"></div>
@@ -54,7 +54,7 @@ const LoginScreen = ({ onLogin }) => {
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-8 text-primary animate-pulse">
                             <Shield className="w-8 h-8" />
-                            <span className="font-bold text-xl tracking-widest">US_CYBER_CMD</span>
+                            <span className="font-bold text-xl tracking-widest">IND_CYBER_CMD</span>
                         </div>
                         
                         <div className="space-y-2 text-xs text-text-muted font-mono">

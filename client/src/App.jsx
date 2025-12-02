@@ -4,6 +4,7 @@ import LoginScreen from './components/LoginScreen';
 import CryptoLab from './components/CryptoLab';
 import SettingsModal from './components/SettingsModal';
 import Geolocator from './components/Geolocator';
+import LandingPage from './components/LandingPage';
 import { MessageSquare, Cpu, Settings, Globe } from 'lucide-react';
 import { playTacticalSound } from './utils/sound';
 
@@ -12,6 +13,7 @@ function App() {
   const [view, setView] = useState('chat'); // 'chat' or 'lab'
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [showLanding, setShowLanding] = useState(true);
   const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY || '');
 
   useEffect(() => {
@@ -39,6 +41,10 @@ function App() {
   }, [isDarkMode]);
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
+  if (showLanding) {
+    return <LandingPage onEnter={() => setShowLanding(false)} />;
+  }
 
   if (!userRole) {
     return (
