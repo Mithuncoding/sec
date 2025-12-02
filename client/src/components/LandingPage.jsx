@@ -20,7 +20,7 @@ const LandingPage = ({ onEnter }) => {
   const teamMembers = ["Mahesh", "Radhika", "Suresh", "Vaishnavi"];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-[#00ff41] font-mono flex flex-col relative overflow-x-hidden overflow-y-auto">
+    <div className="h-dvh bg-[#0a0a0a] text-[#00ff41] font-mono flex flex-col relative overflow-x-hidden overflow-y-auto">
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,65,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
       
