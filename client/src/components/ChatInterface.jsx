@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Shield, Activity, Users, Lock, Wifi, AlertTriangle, Download } from 'lucide-react';
+import { Send, Shield, Activity, Users, Lock, Wifi, AlertTriangle, Download, Trash } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ref, push, onValue, set, onDisconnect, serverTimestamp, query, limitToLast } from 'firebase/database';
 import { database } from '../firebase';
@@ -139,6 +139,13 @@ const ChatInterface = ({ role, onLogout, apiKey }) => {
     playTacticalSound('click');
   };
 
+  const handleClearChat = () => {
+    if (window.confirm('WARNING: THIS WILL ERASE ALL MISSION HISTORY. CONFIRM?')) {
+      set(ref(database, 'messages'), null);
+      playTacticalSound('click');
+    }
+  };
+
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (inputMessage.trim()) {
@@ -208,7 +215,7 @@ const ChatInterface = ({ role, onLogout, apiKey }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 md:gap-6">
           {/* AI Reasoning Display (New) */}
           <div className="hidden md:flex flex-col items-end text-right mr-4">
             <span className="text-[10px] text-text-muted uppercase tracking-widest">AI INTEL ANALYSIS</span>
@@ -217,20 +224,21 @@ const ChatInterface = ({ role, onLogout, apiKey }) => {
             </span>
           </div>
           {/* Threat Level Indicator */}
-          <div className={`flex items-center gap-2 px-3 py-1 border rounded-sm transition-colors ${
+          <div className={`flex items-center gap-2 px-2 md:px-3 py-1 border rounded-sm transition-colors ${
             threatLevel > 50 
             ? 'bg-danger/10 border-danger text-danger animate-pulse' 
             : 'bg-bg-input border-border-strong text-success'
           }`} title={threatAnalysis}>
             <AlertTriangle size={14} />
-            <div className="flex flex-col leading-none">
+            <div className="flex flex-col leading-none hidden sm:flex">
               <span className="text-[10px] font-bold">THREAT_LEVEL</span>
               <span className="text-xs font-bold">{threatLevel}%</span>
             </div>
+            <span className="text-xs font-bold sm:hidden">{threatLevel}%</span>
           </div>
 
           {/* Active Users Indicator */}
-          <div className="flex items-center gap-2 px-3 py-1 bg-bg-input border border-border-strong rounded-sm">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-bg-input border border-border-strong rounded-sm">
             <Users size={14} className="text-secondary" />
             <span className="text-xs font-bold text-secondary">{activeUsers} AGENTS</span>
             <span className="relative flex h-2 w-2">
@@ -241,7 +249,7 @@ const ChatInterface = ({ role, onLogout, apiKey }) => {
 
           <button 
             onClick={handleDownloadLogs}
-            className="text-xs text-primary hover:text-white border border-primary/50 px-3 py-1 hover:bg-primary/10 transition-colors uppercase tracking-widest flex items-center gap-2"
+            className="text-xs text-primary hover:text-white border border-primary/50 px-2 md:px-3 py-1 hover:bg-primary/10 transition-colors uppercase tracking-widest flex items-center gap-2"
             title="Download Mission Logs"
           >
             <Download size={14} />
@@ -250,9 +258,18 @@ const ChatInterface = ({ role, onLogout, apiKey }) => {
 
           <button 
             onClick={onLogout}
-            className="text-xs text-danger hover:text-red-400 border border-danger/50 px-3 py-1 hover:bg-danger/10 transition-colors uppercase tracking-widest"
+            className="text-xs text-danger hover:text-red-400 border border-danger/50 px-2 md:px-3 py-1 hover:bg-danger/10 transition-colors uppercase tracking-widest"
           >
-            [ Terminate ]
+            <span className="hidden sm:inline">[ Terminate ]</span>
+            <span className="sm:hidden">EXIT</span>
+          </button>
+
+          <button 
+            onClick={handleClearChat}
+            className="text-xs text-danger hover:text-red-400 border border-danger/50 px-2 py-1 hover:bg-danger/10 transition-colors"
+            title="ERASE MISSION HISTORY"
+          >
+            <Trash size={14} />
           </button>
         </div>
       </header>
@@ -363,7 +380,9 @@ const ChatInterface = ({ role, onLogout, apiKey }) => {
         </div>
 
         {/* System Status Sidebar (Desktop Only) */}
-        <SystemStatus />
+        <div className="hidden md:block h-full">
+          <SystemStatus />
+        </div>
       </div>
     </div>
   );
