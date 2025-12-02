@@ -1,18 +1,23 @@
-// Simple simulation of AES Encryption for the demo
-// In a real app, use 'crypto-js' or Web Crypto API
+import CryptoJS from 'crypto-js';
 
+// Real AES Encryption using crypto-js
 export const encryptMessage = (text, key = 'secret-key') => {
-    // Simulate encryption by base64 encoding and reversing (just for visual effect)
-    // Real AES would be: CryptoJS.AES.encrypt(text, key).toString();
-    const b64 = btoa(text);
-    return b64.split('').reverse().join('');
+    try {
+        return CryptoJS.AES.encrypt(text, key).toString();
+    } catch (e) {
+        console.error("Encryption error:", e);
+        return text;
+    }
 };
 
 export const decryptMessage = (encryptedText, key = 'secret-key') => {
     try {
-        const reversed = encryptedText.split('').reverse().join('');
-        return atob(reversed);
+        const bytes = CryptoJS.AES.decrypt(encryptedText, key);
+        const originalText = bytes.toString(CryptoJS.enc.Utf8);
+        if (!originalText) return "**DECRYPTION FAILED**";
+        return originalText;
     } catch (e) {
+        console.error("Decryption error:", e);
         return "**DECRYPTION FAILED**";
     }
 };

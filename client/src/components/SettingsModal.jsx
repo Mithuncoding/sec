@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Sun, Moon, Shield, RefreshCw } from 'lucide-react';
 
-const SettingsModal = ({ isOpen, onClose, isDarkMode, toggleTheme }) => {
+const SettingsModal = ({ isOpen, onClose, isDarkMode, toggleTheme, apiKey, onApiKeyChange }) => {
   if (!isOpen) return null;
 
   return (
@@ -52,19 +52,32 @@ const SettingsModal = ({ isOpen, onClose, isDarkMode, toggleTheme }) => {
             </div>
           </div>
 
-          {/* Simulation Settings (Placeholder) */}
+          {/* Encryption Status */}
           <div className="space-y-2">
-            <label className="text-xs font-mono text-text-muted uppercase tracking-widest">Encryption Simulation</label>
+            <label className="text-xs font-mono text-text-muted uppercase tracking-widest">Encryption Status</label>
             <div className="p-3 border border-border-strong bg-bg-input text-text-muted font-mono text-xs">
               <div className="flex justify-between mb-1">
-                <span>AES-256</span>
+                <span>AES-256 (REAL)</span>
                 <span className="text-success">ACTIVE</span>
               </div>
               <div className="flex justify-between">
-                <span>RSA-2048</span>
-                <span className="text-success">ACTIVE</span>
+                <span>THREAT DETECTION</span>
+                <span className={apiKey ? "text-success" : "text-danger"}>{apiKey ? "ONLINE" : "OFFLINE"}</span>
               </div>
             </div>
+          </div>
+
+          {/* API Key Input */}
+          <div className="space-y-2">
+            <label className="text-xs font-mono text-text-muted uppercase tracking-widest">Gemini API Key</label>
+            <input 
+              type="password" 
+              value={apiKey}
+              onChange={(e) => onApiKeyChange(e.target.value)}
+              placeholder="ENTER API KEY..."
+              className="w-full bg-bg-input border border-border-strong p-3 text-text-main placeholder-text-muted focus:outline-none focus:border-primary font-mono text-sm"
+            />
+            <p className="text-[10px] text-text-muted font-mono">Required for AI Threat Detection.</p>
           </div>
 
           {/* System Reset */}

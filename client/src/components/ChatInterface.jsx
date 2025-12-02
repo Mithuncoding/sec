@@ -1,102 +1,190 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Shield, Activity, Users, Lock, Wifi, AlertTriangle } from 'lucide-react';
+import { Send, Shield, Activity, Users, Lock, Wifi, AlertTriangle, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { io } from 'socket.io-client';
-import DecryptedText from './DecryptedText';
+import { ref, push, onValue, set, onDisconnect, serverTimestamp, query, limitToLast } from 'firebase/database';
+import { database } from '../firebase';
 import { playTacticalSound } from '../utils/sound';
+import { initializeAI, analyzeThreatLevel } from '../services/ai';
+import { decryptMessage, encryptMessage } from '../utils/crypto';
 
-// Initialize Socket.IO
-const socket = io('http://localhost:3000');
-
-const ChatInterface = ({ role, onLogout }) => {
+const ChatInterface = ({ role, onLogout, apiKey }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [activeUsers, setActiveUsers] = useState(1); // Default to 1 (self)
-  const [typingUsers, setTypingUsers] = useState({}); // { "User1": true }
+  const [activeUsers, setActiveUsers] = useState(1);
+  const [typingUsers, setTypingUsers] = useState({});
+  const [threatLevel, setThreatLevel] = useState(0);
+  const [threatAnalysis, setThreatAnalysis] = useState('SYSTEM NORMAL');
+  
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const userRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
+    if (apiKey) {
+      initializeAI(apiKey);
+    }
+  }, [apiKey]);
+
+  useEffect(() => {
+    const analyzeLastMessage = async () => {
+      if (messages.length > 0 && apiKey) {
+        const lastMsg = messages[messages.length - 1];
+        const decrypted = decryptMessage(lastMsg.text);
+        
+        if (decrypted && decrypted !== "**DECRYPTION FAILED**") {
+          const result = await analyzeThreatLevel(decrypted);
+          setThreatLevel(result.score);
+          setThreatAnalysis(result.analysis);
+        }
+      }
+    };
+    
+    analyzeLastMessage();
+  }, [messages, apiKey]);
+
+  useEffect(() => {
     scrollToBottom();
   }, [messages, typingUsers]);
 
   useEffect(() => {
-    // Join the chat
-    socket.emit('join', role);
+    // --- Firebase Presence System ---
+    const connectedRef = ref(database, '.info/connected');
+    const presenceRef = ref(database, 'presence');
+    
+    // Create a unique reference for this user
+    const myUserRef = push(presenceRef);
+    userRef.current = myUserRef;
 
-    // Listen for incoming messages
-    socket.on('message', (message) => {
-      setMessages((prev) => [...prev, message]);
-      playTacticalSound('beep'); // Sound on receive
-    });
-
-    // Listen for history
-    socket.on('history', (history) => {
-      setMessages(history);
+    const unsubscribeConnected = onValue(connectedRef, (snap) => {
+      if (snap.val() === true) {
+        // We're connected (or reconnected)!
+        // Set our presence to true
+        set(myUserRef, { role, online: true, lastSeen: serverTimestamp() });
+        // When I disconnect, remove this node
+        onDisconnect(myUserRef).remove();
+      }
     });
 
     // Listen for active users count
-    socket.on('activeUsers', (count) => {
-      setActiveUsers(count);
+    const unsubscribePresence = onValue(presenceRef, (snap) => {
+      if (snap.exists()) {
+        setActiveUsers(Object.keys(snap.val()).length);
+      } else {
+        setActiveUsers(0);
+      }
     });
 
-    // Listen for typing indicators
-    socket.on('userTyping', ({ user, isTyping }) => {
-      setTypingUsers((prev) => {
-        const newTyping = { ...prev };
-        if (isTyping) {
-          newTyping[user] = true;
-        } else {
-          delete newTyping[user];
+    // --- Firebase Messages ---
+    const messagesRef = query(ref(database, 'messages'), limitToLast(50));
+    
+    const unsubscribeMessages = onValue(messagesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Convert object to array
+        const messageList = Object.values(data);
+        setMessages(messageList);
+        playTacticalSound('beep');
+      } else {
+        setMessages([]);
+      }
+    });
+
+    // --- Firebase Typing Indicators ---
+    const typingRef = ref(database, 'typing');
+    const unsubscribeTyping = onValue(typingRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      // Filter out self and false values
+      const othersTyping = {};
+      Object.entries(data).forEach(([key, value]) => {
+        if (key !== role && value === true) {
+          othersTyping[key] = true;
         }
-        return newTyping;
       });
+      setTypingUsers(othersTyping);
     });
 
     return () => {
-      socket.off('message');
-      socket.off('history');
-      socket.off('activeUsers');
-      socket.off('userTyping');
+      unsubscribeConnected();
+      unsubscribePresence();
+      unsubscribeMessages();
+      unsubscribeTyping();
+      if (userRef.current) {
+        set(userRef.current, null); // Remove self on unmount
+      }
     };
   }, [role]);
+
+  const handleDownloadLogs = () => {
+    const logContent = messages.map(msg => {
+      const decrypted = decryptMessage(msg.text);
+      const content = decrypted === "**DECRYPTION FAILED**" ? "[ENCRYPTED DATA]" : decrypted;
+      return `[${msg.timestamp}] ${msg.sender.toUpperCase()}: ${content}`;
+    }).join('\n');
+
+    const blob = new Blob([logContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `MISSION_LOG_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    playTacticalSound('click');
+  };
 
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (inputMessage.trim()) {
+      // Encrypt the message
+      const encryptedText = encryptMessage(inputMessage);
+
       const messageData = {
-        id: crypto.randomUUID(), // Fix: Use randomUUID instead of Date.now()
-        text: inputMessage,
+        id: crypto.randomUUID(),
+        text: encryptedText,
         sender: role,
         timestamp: new Date().toLocaleTimeString([], { hour12: false }),
         isEncrypted: true,
       };
       
-      // Emit message to server
-      socket.emit('sendMessage', messageData);
-      playTacticalSound('send'); // Sound on send
+      // Push to Firebase
+      push(ref(database, 'messages'), messageData);
+      playTacticalSound('send');
       
       setInputMessage('');
-      handleTyping(false); // Stop typing immediately after send
+      handleTyping(false);
     }
   };
 
   const handleTyping = (isTyping) => {
-    socket.emit('typing', { isTyping });
+    // Update typing status in Firebase
+    const myTypingRef = ref(database, `typing/${role}`);
+    set(myTypingRef, isTyping);
     
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     
     if (isTyping) {
       typingTimeoutRef.current = setTimeout(() => {
-        socket.emit('typing', { isTyping: false });
+        set(myTypingRef, false);
       }, 2000);
     }
   };
-
+  
+  // Wait, I need to fix handleSendMessage to actually encrypt.
+  // The previous code didn't encrypt in handleSendMessage?
+  // Let me check the previous file content again.
+  // Line 99: text: inputMessage,
+  // It was sending PLAIN TEXT! The "simulated" encryption was just visual in DecryptedText?
+  // No, DecryptedText takes "text" prop.
+  // Let's look at DecryptedText.jsx later.
+  // But for REAL encryption, I MUST encrypt here.
+  
+  // So I will update handleSendMessage as well.
+  
   return (
     <div className="flex flex-col h-full font-mono relative">
       {/* Tactical Header */}
@@ -119,10 +207,23 @@ const ChatInterface = ({ role, onLogout }) => {
         </div>
 
         <div className="flex items-center gap-6">
+          {/* Threat Level Indicator */}
+          <div className={`flex items-center gap-2 px-3 py-1 border rounded-sm transition-colors ${
+            threatLevel > 50 
+            ? 'bg-danger/10 border-danger text-danger animate-pulse' 
+            : 'bg-bg-input border-border-strong text-success'
+          }`} title={threatAnalysis}>
+            <AlertTriangle size={14} />
+            <div className="flex flex-col leading-none">
+              <span className="text-[10px] font-bold">THREAT_LEVEL</span>
+              <span className="text-xs font-bold">{threatLevel}%</span>
+            </div>
+          </div>
+
           {/* Active Users Indicator */}
           <div className="flex items-center gap-2 px-3 py-1 bg-bg-input border border-border-strong rounded-sm">
             <Users size={14} className="text-secondary" />
-            <span className="text-xs font-bold text-secondary">{activeUsers} AGENTS_ACTIVE</span>
+            <span className="text-xs font-bold text-secondary">{activeUsers} AGENTS</span>
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
@@ -130,10 +231,19 @@ const ChatInterface = ({ role, onLogout }) => {
           </div>
 
           <button 
+            onClick={handleDownloadLogs}
+            className="text-xs text-primary hover:text-white border border-primary/50 px-3 py-1 hover:bg-primary/10 transition-colors uppercase tracking-widest flex items-center gap-2"
+            title="Download Mission Logs"
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">LOGS</span>
+          </button>
+
+          <button 
             onClick={onLogout}
             className="text-xs text-danger hover:text-red-400 border border-danger/50 px-3 py-1 hover:bg-danger/10 transition-colors uppercase tracking-widest"
           >
-            [ Terminate_Link ]
+            [ Terminate ]
           </button>
         </div>
       </header>

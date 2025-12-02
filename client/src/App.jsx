@@ -12,6 +12,13 @@ function App() {
   const [view, setView] = useState('chat'); // 'chat' or 'lab'
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY || '');
+
+  useEffect(() => {
+    if (apiKey) {
+      localStorage.setItem('gemini_api_key', apiKey);
+    }
+  }, [apiKey]);
 
   useEffect(() => {
     // Global click sound listener
@@ -49,6 +56,8 @@ function App() {
           onClose={() => setIsSettingsOpen(false)}
           isDarkMode={isDarkMode}
           toggleTheme={toggleTheme}
+          apiKey={apiKey}
+          onApiKeyChange={setApiKey}
         />
       </>
     );
@@ -117,7 +126,7 @@ function App() {
            <div className="absolute inset-0 bg-[linear-gradient(var(--border-strong)_1px,transparent_1px),linear-gradient(90deg,var(--border-strong)_1px,transparent_1px)] bg-[size:40px_40px] opacity-10 pointer-events-none"></div>
            
            {view === 'chat' ? (
-            <ChatInterface role={userRole} onLogout={() => setUserRole(null)} />
+            <ChatInterface role={userRole} onLogout={() => setUserRole(null)} apiKey={apiKey} />
           ) : view === 'lab' ? (
             <CryptoLab />
           ) : (
@@ -131,7 +140,14 @@ function App() {
         onClose={() => setIsSettingsOpen(false)}
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
+        apiKey={apiKey}
+        onApiKeyChange={setApiKey}
       />
+
+      {/* Copyright Footer */}
+      <div className="absolute bottom-1 right-4 z-50 text-[10px] text-text-muted font-mono opacity-50 hover:opacity-100 transition-opacity">
+        BUILT BY: Mahesh, Radhika, Suresh, Vaishnavi
+      </div>
     </div>
   );
 }
