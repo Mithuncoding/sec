@@ -1,21 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Globe, MapPin, Target, Wifi } from 'lucide-react';
+import React, { useState } from 'react';
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Globe } from 'lucide-react';
 
 const Geolocator = () => {
-  const [agents, setAgents] = useState([]);
-
-  useEffect(() => {
-    // Simulate active agents
-    const simulatedAgents = [
-      { id: 1, lat: 40.7128, lng: -74.0060, name: 'AGENT_ALPHA', status: 'ONLINE' },
-      { id: 2, lat: 51.5074, lng: -0.1278, name: 'AGENT_BRAVO', status: 'IDLE' },
-      { id: 3, lat: 35.6762, lng: 139.6503, name: 'AGENT_CHARLIE', status: 'ACTIVE' },
-      { id: 4, lat: -33.8688, lng: 151.2093, name: 'AGENT_DELTA', status: 'OFFLINE' },
-      { id: 5, lat: 55.7558, lng: 37.6173, name: 'AGENT_ECHO', status: 'WARNING' },
-    ];
-    setAgents(simulatedAgents);
-  }, []);
+  // Simulate active agents with real coordinates
+  const [agents] = useState([
+    { id: 1, lat: 40.7128, lng: -74.0060, name: 'AGENT_ALPHA', status: 'ONLINE', location: 'New York, USA' },
+    { id: 2, lat: 51.5074, lng: -0.1278, name: 'AGENT_BRAVO', status: 'IDLE', location: 'London, UK' },
+    { id: 3, lat: 35.6762, lng: 139.6503, name: 'AGENT_CHARLIE', status: 'ACTIVE', location: 'Tokyo, JP' },
+    { id: 4, lat: -33.8688, lng: 151.2093, name: 'AGENT_DELTA', status: 'OFFLINE', location: 'Sydney, AU' },
+    { id: 5, lat: 55.7558, lng: 37.6173, name: 'AGENT_ECHO', status: 'WARNING', location: 'Moscow, RU' },
+    { id: 6, lat: 19.0760, lng: 72.8777, name: 'AGENT_FOXTROT', status: 'ONLINE', location: 'Mumbai, IN' },
+  ]);
 
   return (
     <div className="w-full h-full flex flex-col p-6 relative overflow-hidden">
@@ -35,55 +32,53 @@ const Geolocator = () => {
       </div>
 
       {/* Map Container */}
-      <div className="flex-1 relative bg-bg-input border border-border-strong rounded-lg overflow-hidden shadow-inner">
-        {/* Grid Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(var(--border-strong)_1px,transparent_1px),linear-gradient(90deg,var(--border-strong)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none"></div>
-        
-        {/* World Map Placeholder (Stylized) */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
-           <div className="text-[200px] text-primary font-bold tracking-tighter select-none">WORLD MAP</div>
-        </div>
+      <div className="flex-1 relative bg-bg-input border border-border-strong rounded-lg overflow-hidden shadow-inner z-0">
+        <MapContainer 
+          center={[20, 0]} 
+          zoom={2} 
+          style={{ height: '100%', width: '100%', background: '#0a0a0a' }}
+          zoomControl={false}
+          attributionControl={false}
+        >
+          {/* Dark Theme Tiles */}
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          />
 
-        {/* Agent Markers */}
-        {agents.map((agent) => (
-          <motion.div
-            key={agent.id}
-            className="absolute"
-            style={{
-              top: `${(90 - agent.lat) * (100 / 180)}%`,
-              left: `${(agent.lng + 180) * (100 / 360)}%`,
-            }}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: agent.id * 0.2 }}
-          >
-            <div className="relative group cursor-pointer">
-              <MapPin className={`w-6 h-6 ${agent.status === 'ONLINE' || agent.status === 'ACTIVE' ? 'text-success' : agent.status === 'WARNING' ? 'text-warning' : 'text-danger'}`} />
-              <span className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${agent.status === 'ONLINE' || agent.status === 'ACTIVE' ? 'bg-success animate-ping' : 'bg-danger'}`}></span>
-              
-              {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-32 bg-bg-surface border border-primary p-2 hidden group-hover:block z-10 shadow-lg">
-                <div className="text-[10px] font-bold text-primary">{agent.name}</div>
-                <div className="text-[8px] text-text-muted">STATUS: {agent.status}</div>
-                <div className="text-[8px] text-text-muted">COORDS: {agent.lat.toFixed(2)}, {agent.lng.toFixed(2)}</div>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+          {/* Agent Markers */}
+          {agents.map((agent) => (
+            <CircleMarker 
+              key={agent.id}
+              center={[agent.lat, agent.lng]}
+              pathOptions={{ 
+                color: agent.status === 'ONLINE' || agent.status === 'ACTIVE' ? '#00ff41' : agent.status === 'WARNING' ? '#ffa500' : '#ff0000',
+                fillColor: agent.status === 'ONLINE' || agent.status === 'ACTIVE' ? '#00ff41' : agent.status === 'WARNING' ? '#ffa500' : '#ff0000',
+                fillOpacity: 0.7,
+                weight: 1
+              }}
+              radius={6}
+            >
+              <Popup className="custom-popup">
+                <div className="font-mono text-xs">
+                  <strong className="text-primary block mb-1">{agent.name}</strong>
+                  <div className="text-gray-600">STATUS: {agent.status}</div>
+                  <div className="text-gray-600">LOC: {agent.location}</div>
+                  <div className="text-gray-400 text-[10px] mt-1">{agent.lat.toFixed(4)}, {agent.lng.toFixed(4)}</div>
+                </div>
+              </Popup>
+            </CircleMarker>
+          ))}
+        </MapContainer>
 
-        {/* Scanning Line */}
-        <motion.div
-            className="absolute top-0 bottom-0 w-1 bg-primary/50 shadow-[0_0_20px_rgba(0,255,65,0.5)]"
-            animate={{ left: ['0%', '100%'] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-        />
+        {/* Scanning Line Overlay */}
+        <div className="absolute inset-0 pointer-events-none z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-size-[100%_2px,3px_100%]"></div>
       </div>
 
       {/* Footer Stats */}
-      <div className="mt-4 grid grid-cols-4 gap-4">
+      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-bg-surface border border-border-strong p-3 flex items-center justify-between">
             <div className="text-xs text-text-muted">ACTIVE AGENTS</div>
-            <div className="text-xl font-bold text-primary">5</div>
+            <div className="text-xl font-bold text-primary">{agents.length}</div>
         </div>
         <div className="bg-bg-surface border border-border-strong p-3 flex items-center justify-between">
             <div className="text-xs text-text-muted">ZONES SECURE</div>
