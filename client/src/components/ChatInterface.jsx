@@ -285,7 +285,7 @@ const ChatInterface = ({ role, onLogout, apiKey }) => {
                   <div className={`absolute bottom-0 w-2 h-2 border-b border-${msg.sender === role ? 'primary' : 'secondary'} ${msg.sender === role ? 'left-0 border-l' : 'right-0 border-r'}`}></div>
                   
                   <div className="text-sm leading-relaxed whitespace-pre-wrap font-mono">
-                    <DecryptedText text={msg.text} speed={20} />
+                    <DecryptedText text={decryptMessage(msg.text)} speed={20} />
                   </div>
                 </div>
               </div>
