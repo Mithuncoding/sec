@@ -11,13 +11,15 @@ export const encryptMessage = (text, key = 'secret-key') => {
 };
 
 export const decryptMessage = (encryptedText, key = 'secret-key') => {
+    if (!encryptedText || typeof encryptedText !== 'string') return "";
     try {
         const bytes = CryptoJS.AES.decrypt(encryptedText, key);
         const originalText = bytes.toString(CryptoJS.enc.Utf8);
-        if (!originalText) return "**DECRYPTION FAILED**";
+        // If decryption results in empty string (often means wrong key or bad format), return original
+        if (!originalText) return encryptedText; 
         return originalText;
     } catch (e) {
-        console.error("Decryption error:", e);
-        return "**DECRYPTION FAILED**";
+        console.warn("Decryption failed, returning raw text:", e);
+        return encryptedText; // Fallback to showing the raw text instead of crashing
     }
 };
