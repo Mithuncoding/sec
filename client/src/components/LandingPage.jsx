@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Shield, Lock, Globe, Cpu, ChevronRight, Terminal } from 'lucide-react';
 
 const LandingPage = ({ onEnter }) => {
+  // Force rebuild: v2.0.5
   const [text, setText] = useState('');
   const fullText = "INITIALIZING SECURE CONNECTION...";
 
