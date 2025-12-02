@@ -69,7 +69,8 @@ function App() {
       <div className="scanline"></div>
 
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-6 py-3 z-20 bg-bg-surface border-b border-border-strong shadow-hud">
+      {/* Navigation (Desktop) */}
+      <nav className="hidden md:flex items-center justify-between px-6 py-3 z-20 bg-bg-surface border-b border-border-strong shadow-hud">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-primary animate-pulse"></div>
           <span className="font-mono font-bold text-primary tracking-wider">SECURE_UPLINK_v2</span>
@@ -119,6 +120,20 @@ function App() {
         </button>
       </nav>
 
+      {/* Navigation (Mobile Header - Just Title & Settings) */}
+      <nav className="flex md:hidden items-center justify-between px-4 py-3 z-20 bg-bg-surface border-b border-border-strong shadow-hud">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-primary animate-pulse"></div>
+          <span className="font-mono font-bold text-primary tracking-wider text-sm">SECURE_UPLINK</span>
+        </div>
+        <button 
+          onClick={() => setIsSettingsOpen(true)}
+          className="p-2 text-text-muted hover:text-primary transition-colors"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
+      </nav>
+
       {/* Main Content */}
       <div className="flex-1 relative z-10 overflow-hidden bg-bg-main p-4">
         <div className="h-full w-full max-w-7xl mx-auto border-x border-border-strong/20 bg-bg-main/50 relative">
@@ -144,9 +159,40 @@ function App() {
         onApiKeyChange={setApiKey}
       />
 
-      {/* Copyright Footer */}
-      <div className="absolute bottom-1 right-4 z-50 text-[10px] text-text-muted font-mono opacity-50 hover:opacity-100 transition-opacity">
+      {/* Copyright Footer (Desktop Only) */}
+      <div className="hidden md:block absolute bottom-1 right-4 z-50 text-[10px] text-text-muted font-mono opacity-50 hover:opacity-100 transition-opacity">
         BUILT BY: Mahesh, Radhika, Suresh, Vaishnavi
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden flex items-center justify-around bg-bg-surface border-t border-border-strong p-2 z-50 pb-safe">
+        <button 
+          onClick={() => setView('chat')}
+          className={`flex flex-col items-center gap-1 p-2 transition-all ${
+            view === 'chat' ? 'text-primary' : 'text-text-muted'
+          }`}
+        >
+          <MessageSquare size={20} />
+          <span className="text-[10px] font-mono font-bold">CHAT</span>
+        </button>
+        <button 
+          onClick={() => setView('lab')}
+          className={`flex flex-col items-center gap-1 p-2 transition-all ${
+            view === 'lab' ? 'text-primary' : 'text-text-muted'
+          }`}
+        >
+          <Cpu size={20} />
+          <span className="text-[10px] font-mono font-bold">CRYPTO</span>
+        </button>
+        <button 
+          onClick={() => setView('geo')}
+          className={`flex flex-col items-center gap-1 p-2 transition-all ${
+            view === 'geo' ? 'text-primary' : 'text-text-muted'
+          }`}
+        >
+          <Globe size={20} />
+          <span className="text-[10px] font-mono font-bold">GEO</span>
+        </button>
       </div>
     </div>
   );

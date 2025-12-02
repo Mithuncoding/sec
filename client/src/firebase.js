@@ -1,16 +1,16 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 
-// TODO: Replace the following with your app's Firebase project configuration
-// See: https://firebase.google.com/docs/web/learn-more#config-object
+// User's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY_HERE",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyBxZwCMysxMgWh8pOwUvK6QcVyrT72Vq4g",
+  authDomain: "fir-5adfb.firebaseapp.com",
+  databaseURL: "https://fir-5adfb-default-rtdb.firebaseio.com",
+  projectId: "fir-5adfb",
+  storageBucket: "fir-5adfb.firebasestorage.app",
+  messagingSenderId: "450132587682",
+  appId: "1:450132587682:web:d12556516b62b14e8093fb",
+  measurementId: "G-WNVF9V9RD8"
 };
 
 // Initialize Firebase
