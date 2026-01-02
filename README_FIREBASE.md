@@ -47,3 +47,28 @@ To make the app work without a backend server (Serverless), you need to connect 
 2.  Run: `npm run dev`
 3.  Open the link (e.g., `http://localhost:5173`).
 4.  **Test**: Open it on your phone (connected to same Wi-Fi) using your laptop's IP address!
+
+---
+
+## Troubleshooting: Message Sending Not Working
+
+If messages are not sending and you see `permission_denied` errors in the browser console, your **Firebase Test Mode rules have expired** (they only last 30 days).
+
+### Fix:
+
+1.  Go to [Firebase Console](https://console.firebase.google.com/)
+2.  Select your project
+3.  Navigate to **Build** → **Realtime Database**
+4.  Click the **Rules** tab
+5.  Update the rules to:
+    ```json
+    {
+      "rules": {
+        ".read": true,
+        ".write": true
+      }
+    }
+    ```
+6.  Click **Publish**
+
+> ⚠️ **Note**: These rules allow public access - suitable for demos only, not production.
