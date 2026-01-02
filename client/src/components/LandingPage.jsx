@@ -125,9 +125,9 @@ const LandingPage = ({ onEnter }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white font-mono relative overflow-hidden">
+    <div className="min-h-screen bg-[#030303] text-white font-mono relative overflow-x-hidden overflow-y-auto">
       {/* Particle Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
+      <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" />
       
       {/* Mouse Glow Effect */}
       <div 
